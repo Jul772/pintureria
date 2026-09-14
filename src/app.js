@@ -7,6 +7,8 @@ const authRoutes = require('./routes/auth.routes');
 const productosRoutes = require('./routes/productos.routes');
 const pedidosRoutes = require('./routes/pedidos.routes');
 const promocionesRoutes = require('./routes/promociones.routes');
+const variacionesRoutes = require('./routes/variaciones.routes');
+const stockRoutes = require('./routes/stock.routes');
 
 const app = express();
 
@@ -28,6 +30,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/productos', productosRoutes);
 app.use('/api/pedidos', pedidosRoutes);
 app.use('/api/promociones', promocionesRoutes);
+app.use('/api/variaciones', variacionesRoutes);
+app.use('/api/stock', stockRoutes);
 
 // Manejo de errores genérico
 app.use((err, req, res, next) => {

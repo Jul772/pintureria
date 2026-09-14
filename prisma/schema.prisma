@@ -81,6 +81,8 @@ model Promocion {
   codigoCupon   String?  @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  pedidos       Pedido[]
 }
 
 model Pedido {
@@ -90,6 +92,9 @@ model Pedido {
   fechaPedido DateTime        @default(now())
   estado      String // PENDIENTE, PAGADO, ENTREGADO, CANCELADO
   total       Decimal         @db.Decimal(10, 2)
+  descuento   Decimal         @default(0) @db.Decimal(10, 2)
+  promocionId String?
+  promocion   Promocion?      @relation(fields: [promocionId], references: [id])
   origen      String // WEB, POS
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
