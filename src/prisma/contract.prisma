@@ -1,0 +1,109 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id          String   @id @default(uuid())
+  nombre      String
+  subdominio  String   @unique
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  productos   Producto[]
+  variaciones Variacion[]
+  stock       Stock[]
+  promociones Promocion[]
+  pedidos     Pedido[]
+}
+
+model Producto {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  nombre      String
+  descripcion String?
+  marca       String?
+  tipo        String? // Ej: LÃ¡tex, Esmalte SintÃ©tico
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  variaciones Variacion[]
+}
+
+model Variacion {
+  id             String   @id @default(uuid())
+  productoId     String
+  producto       Producto @relation(fields: [productoId], references: [id])
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+  presentacion   String // Ej: 1L, 4L, 10L, 20L
+  color          String?
+  superficie     String? // Ej: Interior, Exterior, Madera, Metal
+  precioBase     Decimal  @db.Decimal(10, 2)
+  codigoBarras   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  stock          Stock[]
+  pedidosDetalle PedidoDetalle[]
+}
+
+model Stock {
+  id          String    @id @default(uuid())
+  variacionId String
+  variacion   Variacion @relation(fields: [variacionId], references: [id])
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  cantidad    Int       @default(0)
+  stockMinimo Int       @default(5)
+  alertaStock Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Promocion {
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  nombre        String
+  descripcion   String?
+  tipoDescuento String // PORCENTAJE, MONTO_FIJO
+  valor         Decimal  @db.Decimal(10, 2)
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  activo        Boolean  @default(true)
+  codigoCupon   String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Pedido {
+  id          String          @id @default(uuid())
+  tenantId    String
+  tenant      Tenant          @relation(fields: [tenantId], references: [id])
+  fechaPedido DateTime        @default(now())
+  estado      String // PENDIENTE, PAGADO, ENTREGADO, CANCELADO
+  total       Decimal         @db.Decimal(10, 2)
+  origen      String // WEB, POS
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  detalles    PedidoDetalle[]
+}
+
+model PedidoDetalle {
+  id          String    @id @default(uuid())
+  pedidoId    String
+  pedido      Pedido    @relation(fields: [pedidoId], references: [id])
+  variacionId String
+  variacion   Variacion @relation(fields: [variacionId], references: [id])
+  cantidad    Int
+  precioUnit  Decimal   @db.Decimal(10, 2)
+  subtotal    Decimal   @db.Decimal(10, 2)
+}
